@@ -1,0 +1,50 @@
+
+## HOBO Data Clean Up Procedures
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(gtools)
+library(ggbiplot)
+library(dismo)
+library(rjson)  
+library(RCurl) 
+library(raster)
+library(sp)
+
+setwd("C:/Users/maxge/Downloads/Grad School Papers/Data-Analysis")
+
+# Acquired HOBO Data collects readings every 30 minutes 
+## This means there's lots of data to comb through and make averages for 
+### So this will act as a way to create averages for each day and month 
+#### This will also act as a way to create a timeline for the day in the month
+
+Test_data <- read.csv("Mentor Marsh Air 1.csv")
+
+MTemp <- Test_data[37:8292,2:3]
+
+
+#This will tell us how many data points we have per month 
+
+months <- unique(Temp$Date.Time..CST.)
+
+# Now with the data point count we can begin averaging everything 
+
+avglist <- list()
+
+#This will take all the data and average it 
+# this will also organize it into the calendar year
+
+for (i in 1:7){
+  month <- months[[i]]
+  data <- Temp %>%
+    filter(Date.Time..CST. == month)
+  avg <- mean(data[, 2])
+  avglist[[i]] <- avg
+}
+
+#This will just make it a bit easier to read
+
+averages <- as.matrix(avglist, nrow = 7, ncol = 2)
+
+
