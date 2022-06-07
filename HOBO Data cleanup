@@ -16,8 +16,9 @@ setwd("C:/Users/maxge/Downloads/Grad School Papers/Data-Analysis")
 
 # Acquired HOBO Data collects readings every 30 minutes 
 ## This means there's lots of data to comb through and make averages for 
-### So this will act as a way to create averages for each day and month 
-#### This will also act as a way to create a timeline for the day in the month
+### So this will act as a way to create averages for each month
+#### Before starting you will need to change the date and time columns into only month names for this to work
+### Making averages for the day will specify into the just the date which can be a bit tedious to do by hand
 
 MMA <- read.csv("Revised Data/MM Air Master.csv")
 MMW <- read.csv("Revised Data/MM Water Master.csv")
