@@ -19,32 +19,41 @@ setwd("C:/Users/maxge/Downloads/Grad School Papers/Data-Analysis")
 ### So this will act as a way to create averages for each day and month 
 #### This will also act as a way to create a timeline for the day in the month
 
-Test_data <- read.csv("Mentor Marsh Air 1.csv")
+MMA <- read.csv("Revised Data/MM Air Master.csv")
+MMW <- read.csv("Revised Data/MM Water Master.csv")
+TONA <- read.csv("Revised Data/TON Air Master.csv")
+TONW <- read.csv("Revised Data/TON Water Master.csv")
+UIA <- read.csv("Revised Data/UI Air Master.csv")
+UIW <- read.csv("Revised Data/UI Water.csv")
 
-MTemp <- Test_data[37:8292,2:3]
-
+Ultima <- list(MMA, MMW, TONA, TONW, UIA, UIW)
 
 #This will tell us how many data points we have per month 
-
-months <- unique(Temp$Date.Time..CST.)
-
 # Now with the data point count we can begin averaging everything 
 
-avglist <- list()
+avglist <- c()
+files <- c("MMA", "MMW", "TONA", "TONW", "UIA", "UIW")
+folder <- "Revised Data/"
 
-#This will take all the data and average it 
-# this will also organize it into the calendar year
+#This will take all the data and average it then write individual files
+## this can be changed to make it into a list or data frame if desired
+## I prefer separate files for making figures down the line
 
-for (i in 1:7){
+for (i in 1:6){
+  flare <- Ultima[[i]]
+  months <- unique(flare$Date.Time..CST.)
+  for (i in 1:7){
   month <- months[[i]]
-  data <- Temp %>%
+  data <- flare %>%
     filter(Date.Time..CST. == month)
-  avg <- mean(data[, 2])
-  avglist[[i]] <- avg
+  avg <- mean(data[, 3])
+  avglist[i] <- avg
+  fileA <- files[i]
+  fileB <- ".csv"
+  finalfile <- paste(folder, fileA, fileB, sep = "")
+  write.csv(cbind.data.frame(avglist), finalfile)
 }
+  }
 
-#This will just make it a bit easier to read
-
-averages <- as.matrix(avglist, nrow = 7, ncol = 2)
 
 
