@@ -1,0 +1,130 @@
+
+
+## Mixed Model Statistical procedures
+## Developed by Max Gebhart
+
+
+setwd("C:/Users/maxge/Downloads/Grad School Papers/Data-Analysis")
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(gtools)
+library(dismo)
+library(raster)
+library(sp)
+library(lme4)
+library(Matrix)
+library(pspearman)
+
+# First we will run a simple spearman correlation test to find what environmental variables
+## we can expect within the mix model
+x <- read.csv("Field Starry Data.csv", header=T)
+head(x)
+attach(x)
+y<- cor.test(Bulbil, Temp, method="spearman", exact=F)
+
+## This will make a blank matrix for the p values that are generated
+pvalues <- matrix(nrow = 5, ncol=5, dimnames = list(c("Temp", "DO", "pH", "% Transmittance", "Submersed"), c("Density", "Bulbil", "Above", "Rhizoid", "Total")))
+rvalues <-  matrix(nrow = 5, ncol=5, dimnames = list(c("Temp", "DO", "pH", "% Transmittance", "Submersed"), c("Density", "Bulbil", "Above", "Rhizoid", "Total")))
+
+{
+  ##Density Run
+  {
+    a <- cor.test(Density, Temp, method="spearman", exact=F)
+    b <- cor.test(Density, DO, method="spearman", exact=F)
+    c <- cor.test(Density, pH, method="spearman", exact=F)
+    d <- cor.test(Density, X..Transmittance, method="spearman", exact=F)
+    e <-cor.test(Density, Submersed.Light, method="spearman", exact=F)
+    rvalues[1] <- a$estimate
+    rvalues[2] <- b$estimate
+    rvalues[3] <- c$estimate
+    rvalues[4] <- d$estimate
+    rvalues[5] <- e$estimate
+  }
+  ## Bulbil Run
+  {
+    a <- cor.test(Bulbil, Temp, method="spearman", exact=F)
+    b <- cor.test(Bulbil, DO, method="spearman", exact=F)
+    c <- cor.test(Bulbil, pH, method="spearman", exact=F)
+    d <- cor.test(Bulbil, X..Transmittance, method="spearman", exact=F)
+    e <-cor.test(Bulbil, Submersed.Light, method="spearman", exact=F)
+    rvalues[6] <- a$estimate
+    rvalues[7] <- b$estimate
+    rvalues[8] <- c$estimate
+    rvalues[9] <- d$estimate
+    rvalues[10] <- e$estimate
+  }
+  ## Above run
+  {
+    a <- cor.test(Above, Temp, method="spearman", exact=F)
+    b <- cor.test(Above, DO, method="spearman", exact=F)
+    c <- cor.test(Above, pH, method="spearman", exact=F)
+    d <- cor.test(Above, X..Transmittance, method="spearman", exact=F)
+    e <-cor.test(Above, Submersed.Light, method="spearman", exact=F)
+    rvalues[11] <- a$estimate
+    rvalues[12] <- b$estimate
+    rvalues[13] <- c$estimate
+    rvalues[14] <- d$estimate
+    rvalues[15] <- e$estimate
+  }
+  ## Rhizoid run
+  {
+    a <- cor.test(Rhizoid, Temp, method="spearman", exact=F)
+    b <- cor.test(Rhizoid, DO, method="spearman", exact=F)
+    c <- cor.test(Rhizoid, pH, method="spearman", exact=F)
+    d <- cor.test(Rhizoid, X..Transmittance, method="spearman", exact=F)
+    e <-cor.test(Rhizoid, Submersed.Light, method="spearman", exact=F)
+    rvalues[16] <- a$estimate
+    rvalues[17] <- b$estimate
+    rvalues[18] <- c$estimate
+    rvalues[19] <- d$estimate
+    rvalues[20] <- e$estimate
+  }
+  ## Total run
+  {
+    a <- cor.test(Total, Temp, method="spearman", exact=F)
+    b <- cor.test(Total, DO, method="spearman", exact=F)
+    c <- cor.test(Total, pH, method="spearman", exact=F)
+    d <- cor.test(Total, X..Transmittance, method="spearman", exact=F)
+    e <-cor.test(Total, Submersed.Light, method="spearman", exact=F)
+    rvalues[21] <- a$estimate
+    rvalues[22] <- b$estimate
+    rvalues[23] <- c$estimate
+    rvalues[24] <- d$estimate
+    rvalues[25] <- e$estimate
+  }
+  write.csv(rvalues, file = "Starry (R value) Correlations.csv")
+}
+
+
+#lme4 has built in data from an Arabidopsis study so we can use this as test data
+## test data is important for establishing that the procedures are working
+## this is also a small crash course into the syntax for this package
+{
+## this is to get a simple linear model from the data looking at the effects 
+## between  two variables and the summary will give all values
+Arabidopsis <- Arabidopsis
+ar <- lm(gen ~ total.fruits, data = Arabidopsis)
+summary(ar)
+
+# this will be to get a mixed model using the syntax with rack as a random effect
+## and total.fruits as a fixed effect you can add more to both following the next lines
+ara <- lmer(gen ~ total.fruits + (1 | rack), data = Arabidopsis)
+
+## adding further variables using this (1 | x) will add further to random effects
+## x represents your random effects variable
+ara <- lmer(gen ~ total.fruits + (1 | rack) + (1 | nutrient), data = Arabidopsis)
+
+## by doing the syntax x ~ y + z will add more to your fixed effects list 
+## x, y, and z all being variables you want to understand
+ara <- lmer(gen ~ total.fruits + nutrient + (1| rack), data = Arabidopsis)
+
+## unfortunately you'll need to keep your variables similar as numbers
+## I suggest using binary values for qualitative variables if possible
+## the model created by the lmer function cannot be saved as a csv so you might need to save certain parts 
+## for a csv file if needed
+}
+
+
+
