@@ -1,0 +1,61 @@
+# Occurrences within a raster layer from ENM
+# Max Gebhart
+
+setwd("C:/Users/maxge/Downloads/Grad School Papers/Data-Analysis")
+
+install.packages("fuzzySim")
+library(raster)
+library(fuzzySim)
+library(ENMTools)
+library(ENMeval)
+library(sp)
+library(terra)
+library(dplyr)
+library(tidyr)
+
+## First read in the data that you want evaluated
+# I took public data from USGS NAS and my average asc file from the ENM
+NAS <- read.csv("NAS Data Trimmed.csv")
+ENMAvg <- raster("FRUSHENM/Output/All/Butomus_umbellatus_avg.asc")
+
+## We need to convert the lat long data into spatial points that can be assessed on the raster
+{(NAS$Latitude <- round(NAS$Latitude, digits = 2))
+ NAS$Longitude <- round(NAS$Longitude, digits = 2)}
+
+xy_data <- data.frame(x = NAS$Longitude, y = NAS$Latitude)
+coordinates(xy_data) <- ~ x + y
+
+## Plot your data points just to make sure everything looks correct and accurate
+plot(ENMAvg2)
+points(xy_data,col = "black")
+
+## I'm trimming my raster layer down to where I know there's data since the ENM layers generate a lot of cells
+# The function we're going to do will evaluate every cell available so be warned
+e <- extent(-130, -59, 35, 55)
+ex <- as(e, "SpatialPolygons")
+ENMAvg2 <- crop(ENMAvg, ex)
+
+## Now we can actually assess the records that are present in the raster
+# I'm using the average layer from the ENM however this could probably be done with every layer generated
+## This will evaluate every single cell within the raster which can take a while with large raster layers
+grid_pts <- gridRecords(ENMAvg2, xy_data)
+head(grid_pts)
+
+
+## Now you can evaluate the data based really on whatever you'd like
+# I had a ton of data and cells in the raster so I want to remove all points without an occurrence record
+# I also want to see how many data points fall in the higher suitability zone of my ENM
+# That threshold is determined by you but Phillips 2017 say that this zone can be a score of 1 and up
+
+(presence_count <- grid %>%
+    group_by(presence) %>%
+    tally())
+
+new.data <- grid %>%
+  filter(presence != 0)
+
+highsuit <- new.data %>%
+  filter(Butomus_umbellatus_avg > 1)
+
+highishsuit <- highsuit %>%
+  filter(Butomus_umbellatus_avg > 5)
