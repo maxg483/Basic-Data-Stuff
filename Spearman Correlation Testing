@@ -1,0 +1,164 @@
+## Simple correlation for FRUSH
+
+
+setwd("C:/Users/maxge/Downloads/Grad School Papers/Data-Analysis")
+
+{library(ggplot2)
+  library(dplyr)
+  library(tidyr)
+  library(gtools)
+  library(dismo)
+  library(raster)
+  library(sp)
+  library(lme4)
+  library(Matrix)
+  library(pspearman)
+}
+
+# First we will run a simple spearman correlation test to find what environmental variables
+## we can expect within the mix model
+x <- read.csv("Revised Data/Complete UI.csv", header=T)
+head(x)
+attach(x)
+y<- cor.test(Flowers, Above, method="spearman", exact=F)
+
+## This will make a blank matrix for the p values that are generated
+rvalues <- matrix(nrow = 5, ncol=5, dimnames = list(c("Ramets", "Plant Height", "Water Depth", "Water Temp", "Air Temp"), c("Above", "Below", "Rhizoid", "Flowers", "Bud #")))
+pvalues <- matrix(nrow = 5, ncol=5, dimnames = list(c("Ramets", "Plant Height", "Water Depth", "Water Temp", "Air Temp"), c("Above", "Below", "Rhizoid", "Flowers", "Bud #")))
+
+{
+  ##Above Run
+  {
+    a <- cor.test(Above, Ramets, method="spearman", exact=F)
+    b <- cor.test(Above, Plant.Height, method="spearman", exact=F)
+    c <- cor.test(Above, Water.Depth, method="spearman", exact=F)
+    d <- cor.test(Above, Water.Temp, method="spearman", exact=F)
+    e <-cor.test(Above, Air.Temp, method="spearman", exact=F)
+    rvalues[1] <- a$estimate
+    rvalues[2] <- b$estimate
+    rvalues[3] <- c$estimate
+    rvalues[4] <- d$estimate
+    rvalues[5] <- e$estimate
+  }
+  ## Below Run
+  {
+    a <- cor.test(Below, Ramets, method="spearman", exact=F)
+    b <- cor.test(Below, Plant.Height, method="spearman", exact=F)
+    c <- cor.test(Below, Water.Depth, method="spearman", exact=F)
+    d <- cor.test(Below, Water.Temp, method="spearman", exact=F)
+    e <-cor.test(Below, Air.Temp, method="spearman", exact=F)
+    rvalues[6] <- a$estimate
+    rvalues[7] <- b$estimate
+    rvalues[8] <- c$estimate
+    rvalues[9] <- d$estimate
+    rvalues[10] <- e$estimate
+  }
+  ## Rhizoid run
+  {
+    a <- cor.test(Rhizoid, Ramets, method="spearman", exact=F)
+    b <- cor.test(Rhizoid, Plant.Height, method="spearman", exact=F)
+    c <- cor.test(Rhizoid, Water.Depth, method="spearman", exact=F)
+    d <- cor.test(Rhizoid, Water.Temp, method="spearman", exact=F)
+    e <- cor.test(Rhizoid, Air.Temp, method="spearman", exact=F)
+    rvalues[11] <- a$estimate
+    rvalues[12] <- b$estimate
+    rvalues[13] <- c$estimate
+    rvalues[14] <- d$estimate
+    rvalues[15] <- e$estimate
+  }
+  ## Flowers run
+  {
+    a <- cor.test(Flowers, Ramets, method="spearman", exact=F)
+    b <- cor.test(Flowers, Plant.Height, method="spearman", exact=F)
+    c <- cor.test(Flowers, Water.Depth, method="spearman", exact=F)
+    d <- cor.test(Flowers, Water.Temp, method="spearman", exact=F)
+    e <-cor.test(Flowers, Air.Temp, method="spearman", exact=F)
+    rvalues[16] <- a$estimate
+    rvalues[17] <- b$estimate
+    rvalues[18] <- c$estimate
+    rvalues[19] <- d$estimate
+    rvalues[20] <- e$estimate
+  }
+  ## Bud # run
+  {
+    a <- cor.test(Bud.Number, Ramets, method="spearman", exact=F)
+    b <- cor.test(Bud.Number, Plant.Height, method="spearman", exact=F)
+    c <- cor.test(Bud.Number, Water.Depth, method="spearman", exact=F)
+    d <- cor.test(Bud.Number, Water.Temp, method="spearman", exact=F)
+    e <-cor.test(Bud.Number, Air.Temp, method="spearman", exact=F)
+    rvalues[21] <- a$estimate
+    rvalues[22] <- b$estimate
+    rvalues[23] <- c$estimate
+    rvalues[24] <- d$estimate
+    rvalues[25] <- e$estimate
+  }
+  write.csv(rvalues, file = "R FRush UI Correlations.csv")
+}
+
+{
+{
+  a <- cor.test(Above, Ramets, method="spearman", exact=F)
+  b <- cor.test(Above, Plant.Height, method="spearman", exact=F)
+  c <- cor.test(Above, Water.Depth, method="spearman", exact=F)
+  d <- cor.test(Above, Water.Temp, method="spearman", exact=F)
+  e <-cor.test(Above, Air.Temp, method="spearman", exact=F)
+  pvalues[1] <- a$p.value
+  pvalues[2] <- b$p.value
+  pvalues[3] <- c$p.value
+  pvalues[4] <- d$p.value
+  pvalues[5] <- e$p.value
+}
+## Below Run
+{
+  a <- cor.test(Below, Ramets, method="spearman", exact=F)
+  b <- cor.test(Below, Plant.Height, method="spearman", exact=F)
+  c <- cor.test(Below, Water.Depth, method="spearman", exact=F)
+  d <- cor.test(Below, Water.Temp, method="spearman", exact=F)
+  e <-cor.test(Below, Air.Temp, method="spearman", exact=F)
+  pvalues[6] <- a$p.value
+  pvalues[7] <- b$p.value
+  pvalues[8] <- c$p.value
+  pvalues[9] <- d$p.value
+  pvalues[10] <- e$p.value
+}
+## Rhizoid run
+{
+  a <- cor.test(Rhizoid, Ramets, method="spearman", exact=F)
+  b <- cor.test(Rhizoid, Plant.Height, method="spearman", exact=F)
+  c <- cor.test(Rhizoid, Water.Depth, method="spearman", exact=F)
+  d <- cor.test(Rhizoid, Water.Temp, method="spearman", exact=F)
+  e <- cor.test(Rhizoid, Air.Temp, method="spearman", exact=F)
+  pvalues[11] <- a$p.value
+  pvalues[12] <- b$p.value
+  pvalues[13] <- c$p.value
+  pvalues[14] <- d$p.value
+  pvalues[15] <- e$p.value
+}
+## Flowers run
+{
+  a <- cor.test(Flowers, Ramets, method="spearman", exact=F)
+  b <- cor.test(Flowers, Plant.Height, method="spearman", exact=F)
+  c <- cor.test(Flowers, Water.Depth, method="spearman", exact=F)
+  d <- cor.test(Flowers, Water.Temp, method="spearman", exact=F)
+  e <-cor.test(Flowers, Air.Temp, method="spearman", exact=F)
+  pvalues[16] <- a$p.value
+  pvalues[17] <- b$p.value
+  pvalues[18] <- c$p.value
+  pvalues[19] <- d$p.value
+  pvalues[20] <- e$p.value
+}
+## Bud # run
+{
+  a <- cor.test(Bud.Number, Ramets, method="spearman", exact=F)
+  b <- cor.test(Bud.Number, Plant.Height, method="spearman", exact=F)
+  c <- cor.test(Bud.Number, Water.Depth, method="spearman", exact=F)
+  d <- cor.test(Bud.Number, Water.Temp, method="spearman", exact=F)
+  e <-cor.test(Bud.Number, Air.Temp, method="spearman", exact=F)
+  pvalues[21] <- a$p.value
+  pvalues[22] <- b$p.value
+  pvalues[23] <- c$p.value
+  pvalues[24] <- d$p.value
+  pvalues[25] <- e$p.value
+}
+  write.csv(pvalues, file = "P FRush UI Correlations.csv")
+}
