@@ -1,0 +1,58 @@
+### Normality and One way kruskal wallis tests 
+
+setwd("C:/Users/maxge/Downloads/Grad School Papers/Data-Analysis/")
+
+library(dplyr)
+library(ggpubr)
+library(tidyverse)
+library(rstatix)
+
+MM <- read.csv("Revised Data/MM Data.csv")
+Ton <- read.csv("Revised Data/Ton Data.csv")
+UI <- read.csv("Revised Data/UI Data.csv")
+
+## First let's run a normality test and store everything into a matrix
+NormValues <- matrix(nrow = 2, ncol=9, dimnames = list(c("W", "p-value"), c("A", "R", "F", "RB", "RBD", "AS", "BS", "FS", "RBS")))
+
+## This parentheses could probably be a function or list but I don't want to think how to make it
+## Use the rename in scope function to change the site name and make sure to change the CSV file name
+{
+  vals <- shapiro.test(UI$A)
+  NormValues[1] <- vals$statistic
+  NormValues[2] <- vals$p.value
+  vals <- shapiro.test(UI$BG)
+  NormValues[3] <- vals$statistic
+  NormValues[4] <- vals$p.value
+  vals <- shapiro.test(UI$F)
+  NormValues[5] <- vals$statistic
+  NormValues[6] <- vals$p.value
+  vals <- shapiro.test(UI$RB)
+  NormValues[7] <- vals$statistic
+  NormValues[8] <- vals$p.value
+  vals <- shapiro.test(UI$BD)
+  NormValues[9] <- vals$statistic
+  NormValues[10] <- vals$p.value
+  vals <- shapiro.test(UI$AS)
+  NormValues[11] <- vals$statistic
+  NormValues[12] <- vals$p.value
+  vals <- shapiro.test(UI$BS)
+  NormValues[13] <- vals$statistic
+  NormValues[14] <- vals$p.value
+  vals <- shapiro.test(UI$FS)
+  NormValues[15] <- vals$statistic
+  NormValues[16] <- vals$p.value
+  vals <- shapiro.test(UI$RBS)
+  NormValues[17] <- vals$statistic
+  NormValues[18] <- vals$p.value
+  write.csv(NormValues, "Revised Data/ Norm Test.csv")
+}
+
+## Kruskal Wallis Time
+
+test <- MM %>% kruskal_test(A ~ Month)
+res1<- MM %>%
+  dunn_test(A ~ Month, p.adjust.method = "bonferroni")
+
+
+
+
