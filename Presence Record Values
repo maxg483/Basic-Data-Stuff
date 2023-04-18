@@ -3,7 +3,6 @@
 
 setwd("C:/Users/maxge/Downloads/Grad School Papers/Data-Analysis")
 
-install.packages("fuzzySim")
 library(raster)
 library(fuzzySim)
 library(ENMTools)
@@ -11,35 +10,48 @@ library(ENMeval)
 library(sp)
 library(terra)
 library(dplyr)
-library(tidyr)
 
 ## First read in the data that you want evaluated
 # I took public data from USGS NAS and my average asc file from the ENM
-NAS <- read.csv("NAS Data Trimmed.csv")
+NAS <- read.csv("FRUSHENM/Raster values/NAS Data Trimmed.csv")
 ENMAvg <- raster("FRUSHENM/Output/All/Butomus_umbellatus_avg.asc")
 
 ## We need to convert the lat long data into spatial points that can be assessed on the raster
-{(NAS$Latitude <- round(NAS$Latitude, digits = 2))
- NAS$Longitude <- round(NAS$Longitude, digits = 2)}
+{(NAS$Latitude <- round(NAS$Latitude, digits = 4))
+ NAS$Longitude <- round(NAS$Longitude, digits = 4)}
+
+rasterResolution <- max(res(ENMAvg))
+
+while(min(nndist(NAS[,1:2])) < rasterResolution){
+  nnD <- nndist(NAS[,1:2])
+  NAS <- NAS[-(which(min(nnD) == nnD)[1]),]
+}
 
 xy_data <- data.frame(x = NAS$Longitude, y = NAS$Latitude)
 coordinates(xy_data) <- ~ x + y
 
 ## Plot your data points just to make sure everything looks correct and accurate
 plot(ENMAvg2)
-points(xy_data,col = "black")
+points(xy_data, pch = 16, cex = .25, col = "black")
 
 ## I'm trimming my raster layer down to where I know there's data since the ENM layers generate a lot of cells
 # The function we're going to do will evaluate every cell available so be warned
-e <- extent(-130, -59, 35, 55)
+e <- extent(-123, -66, 37, 51)
 ex <- as(e, "SpatialPolygons")
 ENMAvg2 <- crop(ENMAvg, ex)
 
 ## Now we can actually assess the records that are present in the raster
 # I'm using the average layer from the ENM however this could probably be done with every layer generated
 ## This will evaluate every single cell within the raster which can take a while with large raster layers
-grid_pts <- gridRecords(ENMAvg2, xy_data)
+## The gridRecords function will remove data points based on raster resolution in this case we went from 3742
+## down to about 700
+grid_pts <- gridRecords(ENMAvg2, xy_data, absences = F)
 head(grid_pts)
+
+#The extract function will use every data point on the raster 
+## This might be a bit better for what I wanna do which is just determine how many known points are within
+## high suitability areas and I want to keep every point
+raster_points <- extract(ENMAvg2, NAS)
 
 
 ## Now you can evaluate the data based really on whatever you'd like
@@ -47,11 +59,7 @@ head(grid_pts)
 # I also want to see how many data points fall in the higher suitability zone of my ENM
 # That threshold is determined by you but Phillips 2017 say that this zone can be a score of 1 and up
 
-(presence_count <- grid %>%
-    group_by(presence) %>%
-    tally())
-
-new.data <- grid %>%
+new.data <- grid_pts %>%
   filter(presence != 0)
 
 highsuit <- new.data %>%
@@ -59,3 +67,6 @@ highsuit <- new.data %>%
 
 highishsuit <- highsuit %>%
   filter(Butomus_umbellatus_avg > 5)
+
+
+
