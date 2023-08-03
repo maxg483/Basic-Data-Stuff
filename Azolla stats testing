@@ -16,8 +16,8 @@ anova(Biom)
 BIOANOVA <- anova(Biom)
 
 LSBiom <- lsmeans(Biom,~Treatment)
-multcomp::cld(LSBiom, Letters = 'letters', reversed = TRUE)
-describeBy(Biomass, Treatment)
+multcomp::cld(LSBiom, Letters = 'abcdef', reversed = TRUE)
+describeby(Biomass, Treatment)
 BIOMDESCRIBED <- describeBy(Biomass, Treatment)
 
 }
@@ -31,7 +31,7 @@ anova(Biom)
 BIOANOVA <- anova(Biom)
 
 LSBiom <- lsmeans(Biom,~Treatment)
-multcomp::cld(LSBiom, Letters = 'letters', reversed = TRUE)
+multcomp::cld(LSBiom, Letters = 'abcdef', reversed = TRUE)
 describeBy(Biomass, Treatment)
 BIOMDESCRIBED <- describeBy(Biomass, Treatment)
 
