@@ -1,0 +1,85 @@
+setwd("F:/MSU/Presentations/MSAPMS/Phillip Whitman")
+install.packages('lmerTest')
+library(lmerTest)
+
+if(!require(emmeans)){install.packages("emmeans")}
+if(!require(rcompanion)){install.packages("rcompanion")}
+if(!require(FSA)){install.packages("FSA")}
+if(!require(psych)){install.packages("psych")}
+
+library(emmeans)
+library(rcompanion)
+library(FSA)
+library(psych)
+
+x=read.csv('WITTMANN DATA.csv', header = T)
+head(x)
+attach(x)
+
+MORT=lmer(X4.WAT~TRT + (1|TRIAL))
+anova(MORT)
+Type III Analysis of Variance Table with Satterthwaite's method
+    Sum Sq Mean Sq NumDF DenDF F value    Pr(>F)    
+TRT  33078   16539     2    14  631.48 1.904e-14 ***
+LSMORT=lsmeans(MORT,~TRT)
+multcomp::cld(LSMORT, Letters = 'letters', reversed = TRUE)
+TRT  lsmean   SE   df lower.CL upper.CL .group
+ CARF   93.3 5.28 1.25     50.6    136.0  l    
+ FLUM   88.3 5.28 1.25     45.6    131.0  l    
+ REF     0.0 5.28 1.25    -42.7     42.7   e
+describeBy(X4.WAT,TRT)
+group: CARF
+   vars n  mean   sd median trimmed  mad min max range  skew kurtosis   se
+X1    1 6 93.33 6.06   92.5   93.33 7.41  85 100    15 -0.04    -1.88 2.47
+group: FLUM
+   vars n  mean    sd median trimmed   mad min max range  skew kurtosis   se
+X1    1 6 88.33 11.25   87.5   88.33 14.83  75 100    25 -0.01    -2.17 4.59
+group: REF
+   vars n mean sd median trimmed mad min max range skew kurtosis se
+X1    1 6    0  0      0       0   0   0   0     0  NaN      NaN  0
+
+
+FROND=lmer(LEAF~TRT + (1|TRIAL))
+anova(FROND)
+Type III Analysis of Variance Table with Satterthwaite's method
+    Sum Sq Mean Sq NumDF DenDF F value    Pr(>F)    
+TRT 800.33  400.17     2    14  25.274 2.258e-05 ***
+LSFROND=lsmeans(FROND,~TRT)
+multcomp::cld(LSFROND, Letters = 'letters', reversed = TRUE)
+TRT  lsmean   SE   df lower.CL upper.CL .group
+ REF   17.17 4.69 1.18    -24.7     59.0  l    
+ FLUM   4.33 4.69 1.18    -37.5     46.2   e   
+ CARF   2.00 4.69 1.18    -39.8     43.8   e
+describeBy(LEAF,TRT)
+Descriptive statistics by group 
+group: CARF
+   vars n mean  sd median trimmed  mad min max range skew kurtosis   se
+X1    1 6    2 2.1    1.5       2 2.22   0   5     5 0.33    -1.88 0.86
+group: FLUM
+   vars n mean   sd median trimmed  mad min max range skew kurtosis  se
+X1    1 6 4.33 4.41      4    4.33 5.19   0  11    11 0.28    -1.78 1.8
+group: REF
+   vars n  mean   sd median trimmed   mad min max range skew kurtosis   se
+X1    1 6 17.17 9.66   16.5   17.17 11.86   7  31    24  0.2     -1.9 3.94
+
+BIOMASS=lmer(BIO~TRT + (1|TRIAL))
+anova(BIOMASS)
+Type III Analysis of Variance Table with Satterthwaite's method
+      Sum Sq  Mean Sq NumDF DenDF F value Pr(>F)  
+TRT 0.001348 0.000674     2    14  3.8113 0.0477 *
+LSBIO=lsmeans(BIOMASS,~TRT)
+multcomp::cld(LSBIO, Letters = letters, reversed = TRUE)
+TRT  lsmean     SE   df lower.CL upper.CL .group
+ REF  0.0408 0.0221 1.09   -0.192    0.274  a    
+ FLUM 0.0278 0.0221 1.09   -0.205    0.261  ab   
+ CARF 0.0198 0.0221 1.09   -0.213    0.253   b
+describeBy(BIO,TRT)
+group: CARF
+   vars n mean   sd median trimmed  mad min  max range skew kurtosis   se
+X1    1 6 0.02 0.02   0.01    0.02 0.02   0 0.05  0.05 0.19    -2.12 0.01
+group: FLUM
+   vars n mean   sd median trimmed  mad min  max range skew kurtosis   se
+X1    1 6 0.03 0.03   0.02    0.03 0.03   0 0.07  0.07 0.19    -2.03 0.01
+group: REF
+   vars n mean   sd median trimmed  mad  min  max range skew kurtosis   se
+X1    1 6 0.04 0.03   0.03    0.04 0.01 0.02 0.09  0.07 0.99    -0.72 0.01
