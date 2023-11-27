@@ -1,0 +1,34 @@
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(dismo)
+library(sp)
+library(lme4)
+library (ggpubr)
+library(lmerTest)
+library(emmeans)
+library(agricolae)
+
+setwd("Work/Projects/Herbicide Testing/NuFarm/")
+
+CBMeso <- read.csv(".csv")
+CBMeso <- CBMeso[order(CBMeso$Treatment),]
+
+Summarized <- group_by(CBMeso, Treatment) %>%
+  summarise(
+    count = n(), 
+    mean = mean(Biomass),
+    sd = sd(Biomass),
+    se=sd(Biomass)/sqrt(n())
+  )
+Summarized
+
+ggboxplot(CBMeso, x = "Treatment", y= "Biomass", 
+          color = "Treatment", ylab = "Biomass (g)", 
+          xlab = "Treatment #")
+
+testing <- aov(Biomass~Treatment, data = CBMeso)
+
+LSBiom <- lsmeans(testing,~Treatment)
+
+LSD.test(testing, "Treatment")
