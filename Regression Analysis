@@ -1,0 +1,74 @@
+## Multiple Regression Analysis 2024
+## Max Gebhart
+
+# Example from https://bioinformatics-core-shared-training.github.io/linear-models-r/multiple_regression.html#Section_1:_Multiple_Regression
+plot(trees)
+m1 = lm(Volume ~ Girth, data= trees)
+summary(m1)
+plot(m1)
+
+## My data will be looking at biomass variables compared to air temp, water depth, and year
+## I'll integrate water temperature for the sites that have completed water temp datasets
+# First load data
+setwd("~/Work/Writing/Manuscripts/2023/FloweringRush")
+MM <- read.csv("MM FRush Data.csv")
+TON <- read.csv("TON FRush Data.csv")
+UI <- read.csv("UI FRush data.csv")
+
+
+## I have to coerce my data into only being numeric since decimals were used as blank placeholders in my case
+## double check all data is kept as numerics
+MM <- data.frame(sapply(MM, function(x) as.numeric(as.character(x))))
+TON <- data.frame(sapply(TON, function(x) as.numeric(as.character(x))))
+UI <- data.frame(sapply(UI, function(x) as.numeric(as.character(x))))
+
+
+# This is a test regression for organizing how to grab all the necessary values
+###### 
+test <- lm(formula = A ~ WD, data = MM)
+summary(test)
+
+
+## Name your rows first then your columns in a list then create a matrix with the names and of necessary size
+names <-list(c("ATP", "ATint", "ATat", "ATR", "WTP", "WTint", "WTwt", "WTR", "WDP", "WDint", "WDwd", "WDR" ), c("A", "BG", "F", "RB", "Total", "BD", "Ram", "AS", "BS", "FS", "RBS", "PH"))
+LRoutput <- matrix(nrow = 12, ncol = 12, dimnames = names)
+
+
+## Ok so we have the basics of what we need for this so now we want to make a function that can slam through all the regressions
+### This loop will essentially create a data frame that will harbor all of the end results from the analyses
+### I suggest after you have all the analyses done that you randomly select a few and double check the values
+### They should all be accurate but better safe than sorry
+## REMINDER CHANGE FILE NAME FOR DATASET
+
+
+{
+  LRoutput <- data.frame(matrix(nrow = 12, ncol = 12, dimnames = names))
+for (i in 1:12){
+flow <- list(A, BG, FL, RB, Total, BD, Ram, AS, BS, FS, RBS, PH)
+c <- i
+vari <- flow[[i]]
+at <- lm(vari ~ AT)
+wt <- lm(vari ~ WT)
+wd <- lm(vari ~ WD)
+LRoutput[1,c] <- anova(at)$'Pr(>F)'[1]
+LRoutput[2,c] <- at[["coefficients"]][["(Intercept)"]]
+LRoutput[3,c] <- at[["coefficients"]][["AT"]]
+LRoutput[4,c] <- summary(at)$r.squared
+LRoutput[5,c] <- anova(wt)$'Pr(>F)'[1]
+LRoutput[6,c] <- wt[["coefficients"]][["(Intercept)"]]
+LRoutput[7,c] <- wt[["coefficients"]][["WT"]]
+LRoutput[8,c] <- summary(wt)$r.squared
+LRoutput[9,c] <- anova(wd)$'Pr(>F)'[1]
+LRoutput[10,c] <- wd[["coefficients"]][["(Intercept)"]]
+LRoutput[11,c] <- wd[["coefficients"]][["WD"]]
+LRoutput[12,c] <- summary(wd)$r.squared
+}
+  print(LRoutput)
+  write.csv(LRoutput, "UI results.csv")
+}
+
+
+
+
+
+
