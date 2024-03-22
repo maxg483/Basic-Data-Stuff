@@ -11,6 +11,7 @@ plot(m1)
 ## I'll integrate water temperature for the sites that have completed water temp datasets
 # First load data
 setwd("~/Work/Writing/Manuscripts/2023/FloweringRush")
+Al <- read.csv("All Frush Data.csv")
 MM <- read.csv("MM FRush Data.csv")
 TON <- read.csv("TON FRush Data.csv")
 UI <- read.csv("UI FRush data.csv")
@@ -18,6 +19,7 @@ UI <- read.csv("UI FRush data.csv")
 
 ## I have to coerce my data into only being numeric since decimals were used as blank placeholders in my case
 ## double check all data is kept as numerics
+Al <- data.frame(sapply(Al, function(x) as.numeric(as.character(x))))
 MM <- data.frame(sapply(MM, function(x) as.numeric(as.character(x))))
 TON <- data.frame(sapply(TON, function(x) as.numeric(as.character(x))))
 UI <- data.frame(sapply(UI, function(x) as.numeric(as.character(x))))
@@ -27,12 +29,7 @@ UI <- data.frame(sapply(UI, function(x) as.numeric(as.character(x))))
 ###### 
 test <- lm(formula = A ~ WD, data = MM)
 summary(test)
-
-
-## Name your rows first then your columns in a list then create a matrix with the names and of necessary size
-names <-list(c("ATP", "ATint", "ATat", "ATR", "WTP", "WTint", "WTwt", "WTR", "WDP", "WDint", "WDwd", "WDR" ), c("A", "BG", "F", "RB", "Total", "BD", "Ram", "AS", "BS", "FS", "RBS", "PH"))
-LRoutput <- matrix(nrow = 12, ncol = 12, dimnames = names)
-
+#####
 
 ## Ok so we have the basics of what we need for this so now we want to make a function that can slam through all the regressions
 ### This loop will essentially create a data frame that will harbor all of the end results from the analyses
@@ -42,33 +39,88 @@ LRoutput <- matrix(nrow = 12, ncol = 12, dimnames = names)
 
 
 {
-  LRoutput <- data.frame(matrix(nrow = 12, ncol = 12, dimnames = names))
+  names <-list(c("A", "BG", "F", "RB", "Total", "BD", "Ram", "AS", "BS", "FS", "RBS", "PH"), c("ATP", "ATeq", "ATR", "WTP", "WTeq", "WTR", "WDP", "WDeq", "WDR" ))
+  LRoutput <- data.frame(matrix(nrow = 12, ncol = 9, dimnames = names))
 for (i in 1:12){
-flow <- list(A, BG, FL, RB, Total, BD, Ram, AS, BS, FS, RBS, PH)
-c <- i
-vari <- flow[[i]]
-at <- lm(vari ~ AT)
-wt <- lm(vari ~ WT)
-wd <- lm(vari ~ WD)
-LRoutput[1,c] <- anova(at)$'Pr(>F)'[1]
-LRoutput[2,c] <- at[["coefficients"]][["(Intercept)"]]
-LRoutput[3,c] <- at[["coefficients"]][["AT"]]
-LRoutput[4,c] <- summary(at)$r.squared
-LRoutput[5,c] <- anova(wt)$'Pr(>F)'[1]
-LRoutput[6,c] <- wt[["coefficients"]][["(Intercept)"]]
-LRoutput[7,c] <- wt[["coefficients"]][["WT"]]
-LRoutput[8,c] <- summary(wt)$r.squared
-LRoutput[9,c] <- anova(wd)$'Pr(>F)'[1]
-LRoutput[10,c] <- wd[["coefficients"]][["(Intercept)"]]
-LRoutput[11,c] <- wd[["coefficients"]][["WD"]]
-LRoutput[12,c] <- summary(wd)$r.squared
+  flow <- list(A, BG, FL, RB, Total, BD, Ram, AS, BS, FS, RBS, PH)
+  r <- i
+  vari <- flow[[i]]
+  at <- lm(vari ~ AT)
+  wt <- lm(vari ~ WT)
+  wd <- lm(vari ~ WD)
+  
+  LRoutput[r, 1] <- signif(anova(at)$'Pr(>F)'[1], 4)
+  int <- signif(at[["coefficients"]][["(Intercept)"]], 4)
+  mult <- signif(at[["coefficients"]][["AT"]],4)
+  one <- paste(mult, "x", sep ="")
+  equation <- paste(one, int)
+  LRoutput[r, 2] <- equation
+  LRoutput[r, 3] <- signif(summary(at)$r.squared, 4)
+  
+  LRoutput[r, 4] <- signif(anova(wt)$'Pr(>F)'[1], 4)
+  int <- signif(wt[["coefficients"]][["(Intercept)"]], 4)
+  mult <- signif(wt[["coefficients"]][["WT"]], 4)
+  one <- paste(mult, "x", sep ="")
+  equation <- paste(one, int)
+  LRoutput[r, 5] <- equation
+  LRoutput[r, 6] <- signif(summary(wt)$r.squared, 4)
+  
+  LRoutput[r, 7] <- signif(anova(wd)$'Pr(>F)'[1], 4)
+  int <- signif(wd[["coefficients"]][["(Intercept)"]], 4)
+  mult <- signif(wd[["coefficients"]][["WD"]], 4)
+  one <- paste(mult, "x", sep ="")
+  equation <- paste(one, int)
+  LRoutput[r, 8] <- equation
+  LRoutput[r, 9] <- signif(summary(wd)$r.squared, 4)
 }
   print(LRoutput)
-  write.csv(LRoutput, "UI results.csv")
+  
 }
 
-
-
+{
+  names <-list(c("A", "BG", "F", "RB", "Total", "BD", "Ram", "AS", "BS", "FS", "RBS", "PH"), c("ATP", "ATeq", "ATR", "WTP", "WTeq", "WTR", "WDP", "WDeq", "WDR" ))
+  LRoutput <- data.frame(matrix(nrow = 12, ncol = 9, dimnames = names))
+  for (i in 1:12){
+    flow <- list(A, BG, FL, RB, Total, BD, Ram, AS, BS, FS, RBS, PH)
+    r <- i
+    vari <- flow[[i]]
+    at <- lm(vari ~ AT + I(AT^2))
+    wt <- lm(vari ~ WT + I(WT^2))
+    wd <- lm(vari ~ WD + I(WD^2))
+    { 
+    LRoutput[r, 1] <- signif(pf(summary(at)$fstatistic[1], summary(at)$fstatistic[2], summary(at)$fstatistic[3], lower.tail = FALSE), 4)
+    square <- signif(at[["coefficients"]][["I(AT^2)"]], 4)
+    int <- signif(at[["coefficients"]][["(Intercept)"]], 4)
+    mult <- signif(at[["coefficients"]][["AT"]],4)
+    square <- paste(square, "x2", sep = "")
+    one <- paste(mult, "x", sep ="")
+    equation <- paste(square, one, int)
+    LRoutput[r, 2] <- equation
+    LRoutput[r, 3] <- signif(summary(at)$r.squared, 4)
+    
+    LRoutput[r, 4] <- signif(pf(summary(wt)$fstatistic[1], summary(wt)$fstatistic[2], summary(wt)$fstatistic[3], lower.tail = FALSE), 4)
+    square <- signif(wt[["coefficients"]][["I(WT^2)"]], 4)
+    int <- signif(wt[["coefficients"]][["(Intercept)"]], 4)
+    mult <- signif(wt[["coefficients"]][["WT"]], 4)
+    square <- paste(square, "x2", sep = "")
+    one <- paste(mult, "x", sep ="")
+    equation <- paste(square, one, int)
+    LRoutput[r, 5] <- equation
+    LRoutput[r, 6] <- signif(summary(wt)$r.squared, 4)
+    
+    LRoutput[r, 7] <- signif(pf(summary(wd)$fstatistic[1], summary(wd)$fstatistic[2], summary(wd)$fstatistic[3], lower.tail = FALSE), 4)
+    square <- signif(wd[["coefficients"]][["I(WD^2)"]], 4)
+    int <- signif(wd[["coefficients"]][["(Intercept)"]], 4)
+    mult <- signif(wd[["coefficients"]][["WD"]], 4)
+    square <- paste(square, "x2", sep = "")
+    one <- paste(mult, "x", sep ="")
+    equation <- paste(square, one, int)
+    LRoutput[r, 8] <- equation
+    LRoutput[r, 9] <- signif(summary(wd)$r.squared, 4)
+  }  
+    }
+    print(LRoutput)
+}
 
 
 
